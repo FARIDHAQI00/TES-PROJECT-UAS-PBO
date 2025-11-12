@@ -22,13 +22,14 @@ public class App {
         ArrayList<Transaksi> daftarTransaksi = new ArrayList<>();
         HashMap<String, User> akunMap = new HashMap<>();
 
-        FileService fileService = new FileService("data/menu.txt", "data/transaksi.txt");
+        // ✅ path disesuaikan ke lokasi sebenarnya
+        FileService fileService = new FileService("app/data/menu.txt", "app/data/transaksi.txt");
+
         // load data dari file (jika ada)
         fileService.loadMenus(daftarMenu);
         fileService.loadTransaksi(daftarTransaksi);
 
         // sample akun awal (username -> User)
-        // password plain text disini supaya simpel. Jangan di production :)
         Admin adminDefault = new Admin("admin", "admin123", daftarMenu, daftarTransaksi, fileService);
         Customer userDefault = new Customer("kasir", "kasir123", daftarMenu, daftarTransaksi, fileService);
 
@@ -61,7 +62,6 @@ public class App {
                     continue;
                 } else {
                     CLIHelper.printSuccess("Berhasil login sebagai " + user.getRole().toUpperCase() + " (" + user.getUsername() + ")");
-                    // loop menu berdasarkan role
                     boolean logout = false;
                     while (!logout) {
                         CLIHelper.printLine();

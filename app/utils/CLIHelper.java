@@ -26,7 +26,7 @@ public class CLIHelper {
     }
 
     public static void printLine() {
-        System.out.println("----------------------------------------");
+        System.out.println("-----------------------------------------------------------");
     }
 
     public static void printError(String s) {

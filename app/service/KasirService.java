@@ -34,7 +34,7 @@ public class KasirService {
         boolean adding = true;
         while (adding) {
             CLIHelper.printTableMenu(daftarMenu);
-            System.out.print("Pilih ID Menu (atau ketik 'done' untuk checkout): ");
+            System.out.print("\nPilih ID Menu (atau ketik 'done' untuk checkout): ");
             String id = sc.nextLine().trim();
             if (id.equalsIgnoreCase("done")) break;
             Menu chosen = null;
@@ -60,7 +60,7 @@ public class KasirService {
         // pajak sederhana 10% (opsional)
         double pajak = Math.round(total * 0.10);
         double grandTotal = total + pajak;
-        System.out.printf("Subtotal: Rp%.0f | Pajak 10%%: Rp%.0f | GRAND TOTAL: Rp%.0f\n", total, pajak, grandTotal);
+        System.out.printf("Subtotal: Rp%.0f | Pajak 10%%: Rp%.0f | GRAND TOTAL: Rp%.0f\n\n", total, pajak, grandTotal);
         System.out.println("Metode Bayar: 1. Tunai 2. QRIS");
         System.out.print("Pilih: ");
         int m = Validator.scanInt(sc);
@@ -70,19 +70,19 @@ public class KasirService {
             System.out.print("Bayar (Rp): ");
             bayar = Validator.scanDouble(sc);
             if (bayar < grandTotal) {
-                CLIHelper.printError("Uang tidak cukup. Transaksi dibatalkan.");
+                CLIHelper.printError("Uang tidak cukup. Transaksi dibatalkan.\n");
                 return;
             }
         } else {
             // simulasi QRIS (langsung sukses)
-            System.out.println("QRIS terverifikasi (simulasi).");
+            System.out.println("QRIS terverifikasi (simulasi).\n");
             bayar = grandTotal;
         }
         double kembalian = bayar - grandTotal;
         Transaksi trx = new Transaksi(username, cart, grandTotal, metode);
         daftarTransaksi.add(trx);
         fs.saveTransaksi(daftarTransaksi); // auto save tiap transaksi
-        System.out.println("=== INVOICE ===");
+        System.out.println("\n=== INVOICE ===");
         System.out.println(trx.prettyString());
         System.out.printf("Bayar: Rp%.0f | Kembali: Rp%.0f\n", bayar, kembalian);
         CLIHelper.printSuccess("Transaksi berhasil disimpan. ID: " + trx.getId());

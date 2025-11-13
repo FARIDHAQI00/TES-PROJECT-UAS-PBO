@@ -46,7 +46,7 @@ public class CLIHelper {
             printInfo("Daftar menu kosong.");
             return;
         }
-        System.out.printf("%-6s %-25s %-10s %-8s\n", "ID", "NAMA", "KATEGORI", "HARGA");
+        System.out.printf("\n%-6s %-25s %-10s %-8s\n", "ID", "NAMA", "KATEGORI", "HARGA");
         System.out.println("-----------------------------------------------------------");
         for (Menu m : menus) {
             System.out.printf("%-6s %-25s %-10s Rp%.0f\n", m.getId(), m.getNama(), m.getKategori(), m.getHarga());

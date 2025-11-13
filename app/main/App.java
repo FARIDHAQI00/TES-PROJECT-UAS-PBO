@@ -47,6 +47,8 @@ public class App {
             System.out.println("3. Keluar");
             System.out.print("Pilih: ");
             int pilihan = Validator.scanInt(sc);
+            System.out.print("\n");
+
 
             if (pilihan == 1) {
                 CLIHelper.clearScreen();

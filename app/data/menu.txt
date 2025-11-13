@@ -1,4 +1,4 @@
-M001|Nasi Goreng|makanan|25000
-M002|Mie Goreng|makanan|22000
-M003|Es Teh|minuman|8000
-M004|Kopi Tubruk|minuman|12000
+M001|Nasi Goreng|makanan|25000.0
+M002|Mie Goreng|makanan|22000.0
+M003|Es Teh|minuman|8000.0
+M004|Kopi Tubruk|minuman|12000.0

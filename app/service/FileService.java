@@ -8,11 +8,12 @@ import java.nio.file.*;
 import java.util.ArrayList;
 
 /**
- * Service untuk baca/tulis file (menu & transaksi)
+ * Service untuk baca/tulis file (menu, transaksi, dan user)
  */
 public class FileService {
     private final String menuPath;
     private final String transaksiPath;
+    private final String usersPath = "app/data/users.txt";
 
     public FileService(String menuPath, String transaksiPath) {
         this.menuPath = menuPath;
@@ -24,29 +25,28 @@ public class FileService {
         try {
             Path menu = Paths.get(menuPath);
             Path transaksi = Paths.get(transaksiPath);
+            Path users = Paths.get(usersPath);
 
             // buat folder kalau belum ada
-            if (!Files.exists(menu.getParent())) {
-                Files.createDirectories(menu.getParent());
-            }
+            if (!Files.exists(menu.getParent())) Files.createDirectories(menu.getParent());
 
             // buat file kosong kalau belum ada
             if (!Files.exists(menu)) Files.createFile(menu);
             if (!Files.exists(transaksi)) Files.createFile(transaksi);
+            if (!Files.exists(users)) Files.createFile(users);
 
         } catch (IOException e) {
             System.err.println("Gagal inisialisasi file: " + e.getMessage());
         }
     }
 
+    // ==== MENU ====
     public void loadMenus(ArrayList<Menu> daftarMenu) {
-        daftarMenu.clear(); // biar gak dobel kalau dipanggil ulang
+        daftarMenu.clear();
         try (BufferedReader br = Files.newBufferedReader(Paths.get(menuPath))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
-
-                // format: id|nama|kategori|harga
                 String[] parts = line.split("\\|");
                 if (parts.length >= 4) {
                     String id = parts[0];
@@ -72,6 +72,7 @@ public class FileService {
         }
     }
 
+    // ==== TRANSAKSI ====
     public void loadTransaksi(ArrayList<Transaksi> daftarTransaksi) {
         daftarTransaksi.clear();
         try (BufferedReader br = Files.newBufferedReader(Paths.get(transaksiPath))) {
@@ -90,7 +91,6 @@ public class FileService {
         try {
             String[] parts = line.split("\\|", 6);
             if (parts.length < 5) return null;
-
             String username = parts[1];
             double total = Double.parseDouble(parts[3]);
             String metode = parts[4];
@@ -101,11 +101,9 @@ public class FileService {
                 for (String item : itemsStr.split(";")) {
                     if (item.trim().isEmpty()) continue;
                     String[] t = item.split(",");
-                    items.add(new Transaksi.OrderItem(
-                            t[0], t[1],
+                    items.add(new Transaksi.OrderItem(t[0], t[1],
                             Integer.parseInt(t[2]),
-                            Double.parseDouble(t[3])
-                    ));
+                            Double.parseDouble(t[3])));
                 }
             }
             return new Transaksi(username, items, total, metode);
@@ -123,6 +121,56 @@ public class FileService {
             }
         } catch (IOException e) {
             System.err.println("Error saveTransaksi: " + e.getMessage());
+        }
+    }
+
+    // ==== USERS ====
+    public java.util.HashMap<String, app.model.User> loadUsers(
+            java.util.ArrayList<Menu> daftarMenu,
+            java.util.ArrayList<Transaksi> daftarTransaksi) {
+        java.util.HashMap<String, app.model.User> map = new java.util.HashMap<>();
+        try (BufferedReader br = Files.newBufferedReader(Paths.get(usersPath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] parts = line.split("\\|");
+                if (parts.length >= 3) {
+                    String username = parts[0];
+                    String password = parts[1];
+                    String role = parts[2];
+                    app.model.User u;
+                    if (role.equalsIgnoreCase("admin")) {
+                        u = new app.model.Admin(username, password, daftarMenu, daftarTransaksi, this);
+                    } else {
+                        u = new app.model.Customer(username, password, daftarMenu, daftarTransaksi, this);
+                    }
+                    map.put(username, u);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error loadUsers: " + e.getMessage());
+        }
+        return map;
+    }
+
+    public void saveUsers(java.util.HashMap<String, app.model.User> akunMap) {
+        try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(usersPath))) {
+            for (app.model.User u : akunMap.values()) {
+                bw.write(u.getUsername() + "|" + u.getPassword() + "|" + u.getRole());
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error saveUsers: " + e.getMessage());
+        }
+    }
+
+    public void appendUser(app.model.User u) {
+        try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(usersPath),
+                java.nio.file.StandardOpenOption.APPEND)) {
+            bw.write(u.getUsername() + "|" + u.getPassword() + "|" + u.getRole());
+            bw.newLine();
+        } catch (IOException e) {
+            System.err.println("Error appendUser: " + e.getMessage());
         }
     }
 }

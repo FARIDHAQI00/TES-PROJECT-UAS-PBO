@@ -1,12 +1,8 @@
 package app.service;
 
 import app.model.User;
-
 import java.util.HashMap;
 
-/**
- * Service handling login
- */
 public class LoginService {
     private HashMap<String, User> akunMap;
 

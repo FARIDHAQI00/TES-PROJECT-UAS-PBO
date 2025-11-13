@@ -9,37 +9,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-/**
- * Entry point aplikasi RestiCash+
- */
 public class App {
     public static void main(String[] args) {
         CLIHelper.clearScreen();
         CLIHelper.printBanner();
 
-        // Inisialisasi data
         ArrayList<Menu> daftarMenu = new ArrayList<>();
         ArrayList<Transaksi> daftarTransaksi = new ArrayList<>();
         HashMap<String, User> akunMap = new HashMap<>();
 
-        // ✅ path disesuaikan ke lokasi sebenarnya
         FileService fileService = new FileService("app/data/menu.txt", "app/data/transaksi.txt");
 
-        // load data dari file (jika ada)
         fileService.loadMenus(daftarMenu);
         fileService.loadTransaksi(daftarTransaksi);
 
-        // sample akun awal (username -> User)
+        // load user dari file
+        akunMap.putAll(fileService.loadUsers(daftarMenu, daftarTransaksi));
+
+        // default akun (jika mau manual)
         Admin adminDefault = new Admin("admin", "admin123", daftarMenu, daftarTransaksi, fileService);
-        Customer userDefault = new Customer("kasir", "kasir123", daftarMenu, daftarTransaksi, fileService);
-
         akunMap.put(adminDefault.getUsername(), adminDefault);
-        akunMap.put(userDefault.getUsername(), userDefault);
 
-        // Login service
         LoginService loginService = new LoginService(akunMap);
-
         Scanner sc = new Scanner(System.in);
+
         while (true) {
             CLIHelper.printLine();
             System.out.println("1. Login");
@@ -47,8 +40,6 @@ public class App {
             System.out.println("3. Keluar");
             System.out.print("Pilih: ");
             int pilihan = Validator.scanInt(sc);
-            System.out.print("\n");
-
 
             if (pilihan == 1) {
                 CLIHelper.clearScreen();
@@ -62,16 +53,15 @@ public class App {
                 if (user == null) {
                     CLIHelper.printError("Login gagal — cek username/password");
                     continue;
-                } else {
-                    CLIHelper.printSuccess("Berhasil login sebagai " + user.getRole().toUpperCase() + " (" + user.getUsername() + ")");
-                    boolean logout = false;
-                    while (!logout) {
-                        CLIHelper.printLine();
-                        user.tampilkanMenu();
-                        System.out.print("Pilih: ");
-                        int opt = Validator.scanInt(sc);
-                        logout = user.handleOption(opt, sc);
-                    }
+                }
+                CLIHelper.printSuccess("Berhasil login sebagai " + user.getRole().toUpperCase());
+                boolean logout = false;
+                while (!logout) {
+                    CLIHelper.printLine();
+                    user.tampilkanMenu();
+                    System.out.print("Pilih: ");
+                    int opt = Validator.scanInt(sc);
+                    logout = user.handleOption(opt, sc);
                 }
             } else if (pilihan == 2) {
                 CLIHelper.clearScreen();
@@ -84,13 +74,16 @@ public class App {
                 }
                 System.out.print("Pilih password: ");
                 String np = sc.nextLine().trim();
+
                 Customer newUser = new Customer(nu, np, daftarMenu, daftarTransaksi, fileService);
                 akunMap.put(nu, newUser);
+                fileService.appendUser(newUser); // simpan langsung ke file
                 CLIHelper.printSuccess("Registrasi berhasil. Silakan login.");
             } else if (pilihan == 3) {
                 CLIHelper.printInfo("Bye! Simpan data...");
                 fileService.saveMenus(daftarMenu);
                 fileService.saveTransaksi(daftarTransaksi);
+                fileService.saveUsers(akunMap);
                 break;
             } else {
                 CLIHelper.printError("Pilihan tidak valid.");
